@@ -1,7 +1,10 @@
-import face_recognition
-import cv2
-import numpy as np
 import os
+import subprocess
+
+import cv2
+import face_recognition
+import numpy as np
+
 
 """
 This is a demo of running face recognition on live video from your webcam.
@@ -16,8 +19,49 @@ It's only required if you want to run this specific demo.
 If you have trouble installing it, try any of the other demos that don't require it instead.
 """
 
-# Get a reference to webcam #0 (the default one)
-video_capture = cv2.VideoCapture(2)
+
+def play_video(path):
+    """Play welcoming video."""
+    # Create a VideoCapture object and read from input file
+    cap = cv2.VideoCapture(path)
+
+    # Check if camera opened successfully
+    if cap.isOpened() is False:
+        print("Error opening video  file")
+
+    # Read until video is completed
+    while cap.isOpened():
+
+        # Capture frame-by-frame
+        ret, frame = cap.read()
+        if ret:
+            # Display the resulting frame
+            cv2.imshow("Frame", frame)
+            # Press Q on keyboard to  exit
+            if cv2.waitKey(25) & 0xFF == ord("q"):
+                break
+        # Break the loop
+        else:
+            break
+    # When everything done, release
+    # the video capture object
+    cap.release()
+    # Closes all the frames
+    cv2.destroyAllWindows()
+    # When everything done, release
+    # the video capture object
+    cap.release()
+    # Closes all the frames
+    cv2.destroyAllWindows()
+
+
+real_sim = True
+
+# Get a reference to cameras
+if real_sim:
+    video_capture = cv2.VideoCapture(2)  # RealSim camera
+else:
+    video_capture = cv2.VideoCapture(0)  # Default webcam
 
 # Load a sample picture and learn how to recognize it.
 obama_image = face_recognition.load_image_file(
@@ -34,6 +78,7 @@ biden_face_encoding = face_recognition.face_encodings(biden_image)[0]
 # Create arrays of known face encodings and their names
 known_face_encodings = [obama_face_encoding, biden_face_encoding]
 known_face_names = ["Barack Obama", "Joe Biden"]
+known_face_names_flags = [False, False]
 
 # Initialize some variables
 face_locations = []
@@ -67,7 +112,7 @@ while True:
             )
             name = "Unknown"
 
-            # # If a match was found in known_face_encodings, just use the first one.
+            # If a match was found in known_face_encodings, just use the first one.
             # if True in matches:
             #     first_match_index = matches.index(True)
             #     name = known_face_names[first_match_index]
@@ -79,8 +124,16 @@ while True:
             best_match_index = np.argmin(face_distances)
             if matches[best_match_index]:
                 name = known_face_names[best_match_index]
-
-            face_names.append(name)
+                face_names.append(name)
+                if not known_face_names_flags[best_match_index]:
+                    p = subprocess.Popen(
+                        [
+                            "/usr/bin/ffplay",
+                            "-autoexit",
+                            os.path.abspath("videos/examples/obama.mp4"),
+                        ]
+                    )
+                    known_face_names_flags[best_match_index] = True
 
     process_this_frame = not process_this_frame
 
@@ -109,6 +162,6 @@ while True:
     if cv2.waitKey(1) & 0xFF == ord("q"):
         break
 
-# Release handle to the webcam
+# Release handle to the camera
 video_capture.release()
 cv2.destroyAllWindows()

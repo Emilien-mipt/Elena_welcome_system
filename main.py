@@ -124,7 +124,8 @@ while True:
             best_match_index = np.argmin(face_distances)
             if matches[best_match_index]:
                 name = known_face_names[best_match_index]
-                face_names.append(name)
+                if name == "Unknown":
+                    break
                 if not known_face_names_flags[best_match_index]:
                     p = subprocess.Popen(
                         [
@@ -134,7 +135,7 @@ while True:
                         ]
                     )
                     known_face_names_flags[best_match_index] = True
-
+            face_names.append(name)
     process_this_frame = not process_this_frame
 
     # Display the results

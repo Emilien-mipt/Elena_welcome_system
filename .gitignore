@@ -6,3 +6,6 @@
 
 # virtual environments
 /venv
+
+# PyCharm configs
+.idea/

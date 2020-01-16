@@ -34,7 +34,7 @@ def display_res(frame, ratio, face_loc, face_names):
         right *= int(ratio)
         bottom *= int(ratio)
         left *= int(ratio)
-
+        
         # Draw a box around the face
         cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
 

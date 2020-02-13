@@ -18,8 +18,8 @@ It's only required if you want to run this specific demo.
 If you have trouble installing it, try any of the other demos that don't require it instead.
 """
 
-PIC_PATH = "./pics/Robotics_Lab/"
-VID_PATH = "./videos/Robotics_Lab/"
+PIC_PATH = "../pics/Robotics_Lab/"
+VID_PATH = "../videos/Robotics_Lab/"
 
 RATIO = 2.0  # Ratio by which the frame is resized to make the program work faster
 

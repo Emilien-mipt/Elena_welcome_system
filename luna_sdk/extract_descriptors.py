@@ -3,7 +3,6 @@ import os
 
 # VisionLabs
 import FaceEngine as fe
-
 import numpy as np
 from PIL import Image as PILImage
 
@@ -24,10 +23,12 @@ def get_known_names(image_names):
         # Get names
         name = os.path.splitext(image_names[i])[0]
         known_face_names.append(name)
+    assert(len(image_names) == len(known_face_names))
+    print("Names in the database: {}".format(known_face_names))
     return known_face_names
 
 
-def detect_faces(_image_det):
+def detect_face(_image_det):
     detector_type = fe.DetectionType(1)
     detector = faceEngine.createDetector(fe.FACE_DET_DEFAULT)
     errors, detector_result = detector.detectOne(
@@ -66,7 +67,7 @@ def extract_from_photo(image_name):
     if not image.isValid():
         print("Image error = ", err)
     # unpack detector result
-    face = detect_faces(image)
+    face = detect_face(image)
     detection = face.detection
     # check detector result is valid
     if (detection.rect.height < 1) and (detection.rect.width < 1):
@@ -80,30 +81,13 @@ def extract_from_photo(image_name):
     return desc
 
 
-def get_descriptors(image_names):
+def get_descriptors(image_names, known_names):
     people_descriptors = {}
-    known_names = get_known_names(image_names)
-    print("Names in the database: {}".format(known_names))
     N = len(image_names)
+    print("Extracting the descriptors from the database...")
     for i in range(N):
         people_descriptors[known_names[i]] = extract_from_photo(image_names[i])
-        people_descriptors[known_names[i]] = str(people_descriptors[known_names[i]])
+    assert(len(people_descriptors) == len(image_names))
+    print("Extracted the descriptors sucessfuly.")
     return people_descriptors
 
-
-def descriptors_to_json(people_descriptors):
-    with open("descriptors.json", "w") as descriptor_file:
-        json.dump(people_descriptors, descriptor_file)
-
-
-if __name__ == "__main__":
-    # Get image names and sort them
-    image_names = os.listdir(face_image_path)
-    image_names.sort()
-    print("Image names: {}".format(image_names))
-
-    people_descriptors = get_descriptors(image_names)
-    print("Extracted descriptors: \n", people_descriptors)
-
-    descriptors_to_json(people_descriptors)
-    print("Wrote the descriptors to the file sucessfully")

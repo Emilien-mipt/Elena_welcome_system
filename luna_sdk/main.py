@@ -7,9 +7,8 @@ import cv2
 import FaceEngine as fe
 import numpy as np
 
-from extract_descriptors import get_descriptors, get_known_names
-from recognize import recognize
-from recognize import play_video
+from extract_descriptors import Database_creator
+from recognize import Recognizer
 
 # PATHS
 luna_sdk_path = "/home/emin/Documents/luna-sdk_ub1804_rel_v.3.8.8"
@@ -20,8 +19,8 @@ video_path = "../videos/Robotics_Lab/"
 
 N_FRAMES = 5 # Process only every N_FRAMES frame
 
-faceEngine = fe.createFaceEngine(data_path, conf_path)
-
+database = Database_creator()
+recognizer = Recognizer(max_detections = 10, threshold = 0.8)
 
 def main():
     # Get image names and sort them
@@ -33,12 +32,15 @@ def main():
     video_names.sort()
 
     # Get names of the people from uploaded images and their face encodings
-    known_face_names = get_known_names(image_names)
+    known_face_names = database.get_known_names(image_names)
     # Create arrays to remember the faces, that were already recognised by the camera
-    known_face_names_flags = [False for i in range(len(image_names))]
+    known_face_names_flags = recognizer.define_known_flags_array(image_names)
+
+    assert(len(known_face_names) == len(known_face_names_flags))
 
     # Load dictionary with descriptors
-    descriptors_dict = get_descriptors(image_names, known_face_names)
+    descriptors_dict = database.get_descriptors(image_names, known_face_names)
+    #print(descriptors_dict)
 
     video_capture = cv2.VideoCapture(0)
     process = True
@@ -64,13 +66,13 @@ def main():
             continue
 
         if count_frames%N_FRAMES == 0:
-            face_names, best_match_indexes = recognize(
+            face_names, best_match_indexes = recognizer.recognize(
                 image, known_face_names, descriptors_dict
             )
             print(face_names)
             print()
-            play_video(
-                known_face_names_flags, known_face_names, best_match_indexes, video_path
+            recognizer.play_video(
+                known_face_names, best_match_indexes, video_path
             )
             count_frames = 0
 

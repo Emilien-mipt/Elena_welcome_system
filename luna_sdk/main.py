@@ -1,6 +1,7 @@
 import json
 import os
 import subprocess
+from time import time
 
 import cv2
 # VisionLabs
@@ -20,7 +21,7 @@ video_path = "../videos/Robotics_Lab/"
 N_FRAMES = 5 # Process only every N_FRAMES frame
 
 database = Database_creator()
-recognizer = Recognizer(max_detections = 10, threshold = 0.8)
+recognizer = Recognizer(threshold = 0.8)
 
 def main():
     # Get image names and sort them
@@ -38,9 +39,11 @@ def main():
 
     assert(len(known_face_names) == len(known_face_names_flags))
 
+    start_time = time()
     # Load dictionary with descriptors
     descriptors_dict = database.get_descriptors(image_names)
     #print(descriptors_dict)
+    print("Time for database creation: {:.4f}".format(time() - start_time))
 
     video_capture = cv2.VideoCapture(0)
     process = True

@@ -12,8 +12,7 @@ conf_path = data_path + "/faceengine.conf"
 
 
 class Recognizer:
-    def __init__(self, max_detections, threshold):
-        self.max_detections = max_detections
+    def __init__(self, threshold):
         self.threshold = threshold
         # Create face engine
         self.faceEngine = fe.createFaceEngine(data_path, conf_path)
@@ -28,10 +27,11 @@ class Recognizer:
         return self.known_face_flags
 
     def _detect_faces(self, _image_det):
+        max_detections = 10
         detector_type = fe.DetectionType(1)
         detector = self.faceEngine.createDetector(fe.FACE_DET_DEFAULT)
         errors, detector_result = detector.detect(
-            [_image_det], [_image_det.getRect()], self.max_detections, detector_type
+            [_image_det], [_image_det.getRect()], max_detections, detector_type
         )
         return detector_result
 

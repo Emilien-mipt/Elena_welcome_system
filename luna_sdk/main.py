@@ -15,29 +15,25 @@ from recognize import Recognizer
 luna_sdk_path = "/home/emin/Documents/luna-sdk_ub1804_rel_v.3.8.8"
 data_path = luna_sdk_path + "/data"
 conf_path = data_path + "/faceengine.conf"
+
+# Paths to pics and videos from the dataset
 face_image_path = "../pics/Robotics_Lab/"
 video_path = "../videos/Robotics_Lab/"
 
 N_FRAMES = 5 # Process only every N_FRAMES frame
 
 database = Database_creator()
-recognizer = Recognizer(threshold = 0.8)
+recognizer = Recognizer(threshold = 0.9)
 
 def main():
     # Get image names and sort them
     image_names = os.listdir(face_image_path)
-    image_names.sort()
 
     # Get video names and sort them
     video_names = os.listdir(video_path)
-    video_names.sort()
 
     # Get names of the people from uploaded images and their face encodings
     known_face_names = database.get_known_names(image_names)
-    # Create arrays to remember the faces, that were already recognised by the camera
-    known_face_names_flags = recognizer.define_known_flags_array(image_names)
-
-    assert(len(known_face_names) == len(known_face_names_flags))
 
     start_time = time()
     # Load dictionary with descriptors
@@ -69,13 +65,11 @@ def main():
             continue
         # Process every N_FRAMES frame
         if count_frames%N_FRAMES == 0:
-            face_names, best_match_indexes = recognizer.recognize(
-                image, known_face_names, descriptors_dict
+            face_names = recognizer.recognize(
+                image, descriptors_dict
             )
-            print(face_names)
-            print()
             recognizer.play_video(
-                known_face_names, best_match_indexes, video_path
+                face_names, video_path
             )
             count_frames = 0
 

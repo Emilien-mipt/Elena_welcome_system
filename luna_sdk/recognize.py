@@ -24,10 +24,8 @@ class Recognizer:
         self.matcher = self.faceEngine.createMatcher()
         # Create descriptor to load the descriptors from the database
         self.loaded_descriptor = self.faceEngine.createDescriptor()
-
-    def define_known_flags_array(self, image_names):
-        self.known_face_flags = [False for i in range(len(image_names))]
-        return self.known_face_flags
+        # Create the set to store the names of people who are already recognized by the system
+        self.recognized_people = set()
 
     def _detect_faces(self, _image_det):
         max_detections = 10
@@ -62,9 +60,8 @@ class Recognizer:
         return result.value.similarity
 
     # Recognize and return recognition result
-    def recognize(self, frame, known_names, descriptor_dictionary):
+    def recognize(self, frame, descriptor_dictionary):
         face_names = []
-        best_indexes = []
 
         # unpack detector result
         faces = self._detect_faces(frame)[0]
@@ -89,26 +86,24 @@ class Recognizer:
             ext = self.image_extractor.extractFromWarpedImage(warped_result, self.image_descriptor)
             for key, value in descriptor_dictionary.items():
                 # identify person
-                print("Check descriptor {}".format(key))
+                print("Check descriptor: {}".format(key))
 
                 similarity = self._compare_descriptors(value)
                 print(similarity)
                 if similarity > self.threshold:
                     name = key
-                    index = known_names.index(name)
-                    best_indexes.append(index)
                     break
             face_names.append(name)
-
+            print(face_names)            
         print("elapsed time: {:.4f}".format(time() - start_time))
-        return (face_names, best_indexes)
+        print()
+        return face_names
 
-    def play_video(self, known_names, best_indexes, vid_path):
+    def play_video(self, face_names, vid_path):
         """Play videos corresponding to recognised people."""
-        for index in best_indexes:
-            if not self.known_face_flags[index]:
-                name = known_names[index]
-                print(name)
+        for name in face_names:
+            if name not in self.recognized_people:
+                self.recognized_people.add(name)
                 p = subprocess.Popen(
                     [
                         "/usr/bin/ffplay",
@@ -117,4 +112,3 @@ class Recognizer:
                     ]
                 )
                 p.wait()
-                self.known_face_flags[index] = True

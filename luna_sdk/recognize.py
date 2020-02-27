@@ -2,6 +2,9 @@ import os
 import subprocess
 from time import time
 
+import numpy as np
+import cv2
+
 # VisionLabs
 import FaceEngine as fe
 
@@ -20,7 +23,7 @@ class Recognizer:
         # Create extractor and descriptor for detected faces in the frame
         self.image_extractor = self.faceEngine.createExtractor()
         self.image_descriptor = self.faceEngine.createDescriptor()
-        # Create matcher 
+        # Create matcher
         self.matcher = self.faceEngine.createMatcher()
         # Create descriptor to load the descriptors from the database
         self.loaded_descriptor = self.faceEngine.createDescriptor()
@@ -61,10 +64,20 @@ class Recognizer:
 
     # Recognize and return recognition result
     def recognize(self, frame, descriptor_dictionary):
+        # convert frame to numpy array
+        np_image = np.asarray(frame)
+        # create FaceEngine img
+        image = fe.Image()
+        # push np img to FE img
+        image.setData(np_image, fe.FormatType.R8G8B8)
+        if not image.isValid():
+            print("Image in FE format is not valid")
+
         face_names = []
+        boxes = []
 
         # unpack detector result
-        faces = self._detect_faces(frame)[0]
+        faces = self._detect_faces(image)[0]
         faces.sort(key=self._sort_by_square)
 
         start_time = time()
@@ -83,7 +96,9 @@ class Recognizer:
                 self.warper, face.img, detection, face.landmarks5_opt.value()
             )
             # extract descriptor from videostream
-            ext = self.image_extractor.extractFromWarpedImage(warped_result, self.image_descriptor)
+            ext = self.image_extractor.extractFromWarpedImage(
+                warped_result, self.image_descriptor
+            )
             for key, value in descriptor_dictionary.items():
                 # identify person
                 print("Check descriptor: {}".format(key))
@@ -94,10 +109,12 @@ class Recognizer:
                     name = key
                     break
             face_names.append(name)
-            print(face_names)            
+            box = face.detection.rect
+            boxes.append(box)
+            print(face_names)
         print("elapsed time: {:.4f}".format(time() - start_time))
         print()
-        return face_names
+        return (face_names, boxes)
 
     def play_video(self, face_names, vid_path):
         """Play videos corresponding to recognised people."""
@@ -112,3 +129,10 @@ class Recognizer:
                     ]
                 )
                 p.wait()
+
+    def draw_bounding_boxes(self, frame, face_names, boxes):
+        for name, box in zip(face_names, boxes):
+            print(box.x, box.y, box.x + box.width, box.y + box.height)
+            cv2.rectangle(frame, (int(box.x), int(box.y)), (int(box.x + box.width), int(box.y + box.height)), (0, 0, 255), 3)
+            font = cv2.FONT_HERSHEY_SIMPLEX
+            cv2.putText(frame, name, (int(box.x), int(box.y - 10)), font, 1, (25, 240, 25), 2)

@@ -20,7 +20,7 @@ conf_path = data_path + "/faceengine.conf"
 face_image_path = "../pics/Robotics_Lab/"
 video_path = "../videos/Robotics_Lab/"
 
-N_FRAMES = 5 # Process only every N_FRAMES frame
+N_FRAMES = 1 # Process only every N_FRAMES frame
 
 database = Database_creator()
 recognizer = Recognizer(threshold = 0.9)
@@ -54,23 +54,15 @@ def main():
             print("Could not read frame!")
             process = False
             break
-
-        # convert frame to numpy array
-        np_image = np.asarray(frame)
-        # create FaceEngine img
-        image = fe.Image()
-        # push np img to FE img
-        image.setData(np_image, fe.FormatType.R8G8B8)
-        if not image.isValid():
-            continue
         # Process every N_FRAMES frame
         if count_frames%N_FRAMES == 0:
-            face_names = recognizer.recognize(
-                image, descriptors_dict
+            (face_names, boxes) = recognizer.recognize(
+                frame, descriptors_dict
             )
             recognizer.play_video(
                 face_names, video_path
             )
+            recognizer.draw_bounding_boxes(frame, face_names, boxes)
             count_frames = 0
 
         cv2.imshow("frame", frame)

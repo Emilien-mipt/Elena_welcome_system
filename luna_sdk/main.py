@@ -67,7 +67,7 @@ def main():
         image.setData(np_image, fe.FormatType.R8G8B8)
         if not image.isValid():
             continue
-
+        # Process every N_FRAMES frame
         if count_frames%N_FRAMES == 0:
             face_names, best_match_indexes = recognizer.recognize(
                 image, known_face_names, descriptors_dict

@@ -17,9 +17,12 @@ class Recognizer:
         # Create face engine
         self.faceEngine = fe.createFaceEngine(data_path, conf_path)
         self.warper = self.faceEngine.createWarper()
+        # Create extractor and descriptor for detected faces in the frame
         self.image_extractor = self.faceEngine.createExtractor()
         self.image_descriptor = self.faceEngine.createDescriptor()
+        # Create matcher 
         self.matcher = self.faceEngine.createMatcher()
+        # Create descriptor to load the descriptors from the database
         self.loaded_descriptor = self.faceEngine.createDescriptor()
 
     def define_known_flags_array(self, image_names):

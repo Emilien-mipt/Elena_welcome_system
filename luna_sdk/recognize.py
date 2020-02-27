@@ -125,7 +125,9 @@ class Recognizer:
                     [
                         "/usr/bin/ffplay",
                         "-autoexit",
-                        os.path.join(vid_path, name + ".mp4"),
+                        "-vf",
+                        "colorkey=green:0.3:0.2,fade=in:0:15",
+                        os.path.join(vid_path, name),
                     ]
                 )
                 p.wait()

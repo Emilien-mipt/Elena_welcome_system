@@ -12,9 +12,9 @@ data_path = luna_sdk_path + "/data"
 conf_path = data_path + "/faceengine.conf"
 face_image_path = "../pics/Robotics_Lab/"
 
+
 # The class that creates the database with descriptors from the pictures in the database
 class Database_creator:
-
     def __init__(self):
         self.faceEngine = fe.createFaceEngine(data_path, conf_path)
         # Create warper
@@ -34,6 +34,7 @@ class Database_creator:
             self.known_face_names.append(name)
         assert len(image_names) == len(self.known_face_names)
         print("Names in the database: {}".format(self.known_face_names))
+        print("Number of people in the dataset: {}".format(N))
         return self.known_face_names
 
     def _detect_face(self, _image_det):
@@ -76,17 +77,21 @@ class Database_creator:
             print("no face")
             return
         # warp image
-        warped_result = self._warp_faces(face.img, detection, face.landmarks5_opt.value())
+        warped_result = self._warp_faces(
+            face.img, detection, face.landmarks5_opt.value()
+        )
         # extract descrptor
         ext = self.extractor.extractFromWarpedImage(warped_result, self.descriptor)
         err, desc = self.descriptor.save()
         return desc
 
-    def get_descriptors(self, image_names, known_names):
+    def get_descriptors(self, image_names):
         N = len(image_names)
         print("Extracting the descriptors from the database...")
         for i in range(N):
-            self.people_descriptors[known_names[i]] = self._extract_from_photo(image_names[i])
+            self.people_descriptors[
+                self.known_face_names[i]
+            ] = self._extract_from_photo(image_names[i])
         assert len(self.people_descriptors) == len(image_names)
         print("Extracted the descriptors sucessfuly.")
         return self.people_descriptors

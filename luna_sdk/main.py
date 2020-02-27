@@ -39,7 +39,7 @@ def main():
     assert(len(known_face_names) == len(known_face_names_flags))
 
     # Load dictionary with descriptors
-    descriptors_dict = database.get_descriptors(image_names, known_face_names)
+    descriptors_dict = database.get_descriptors(image_names)
     #print(descriptors_dict)
 
     video_capture = cv2.VideoCapture(0)

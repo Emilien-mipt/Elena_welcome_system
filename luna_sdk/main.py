@@ -20,7 +20,7 @@ conf_path = data_path + "/faceengine.conf"
 face_image_path = "../pics/Robotics_Lab/"
 video_path = "../videos/Robotics_Lab/"
 
-N_FRAMES = 1 # Process only every N_FRAMES frame
+N_FRAMES = 25 # Process only every N_FRAMES frame
 
 database = Database_creator()
 recognizer = Recognizer(threshold = 0.9)
@@ -54,16 +54,23 @@ def main():
             print("Could not read frame!")
             process = False
             break
+
+        # Recognize and find faces and locations
+        (face_names, boxes) = recognizer.recognize(
+            frame, descriptors_dict
+        )
+        # Draw boxes
+        recognizer.draw_bounding_boxes(frame, face_names, boxes)
+        
+        if len(face_names) == 0:
+            continue
+        else:
         # Process every N_FRAMES frame
-        if count_frames%N_FRAMES == 0:
-            (face_names, boxes) = recognizer.recognize(
-                frame, descriptors_dict
-            )
-            recognizer.play_video(
-                face_names, video_path
-            )
-            recognizer.draw_bounding_boxes(frame, face_names, boxes)
-            count_frames = 0
+            if count_frames%N_FRAMES == 0:
+                recognizer.play_video(
+                    face_names, video_path
+                )
+                count_frames = 0
 
         cv2.imshow("frame", frame)
         if cv2.waitKey(1) & 0xFF == ord("q"):

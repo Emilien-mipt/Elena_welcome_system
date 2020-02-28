@@ -27,8 +27,7 @@ class Recognizer:
         self.matcher = self.faceEngine.createMatcher()
         # Create descriptor to load the descriptors from the database
         self.loaded_descriptor = self.faceEngine.createDescriptor()
-        # Create the set to store the names of people who are already recognized by the system
-        self.recognized_people = set()
+
 
     def _detect_faces(self, _image_det):
         max_detections = 10
@@ -116,25 +115,52 @@ class Recognizer:
         print()
         return (face_names, boxes)
 
-    def play_video(self, face_names, vid_path):
+    def play_video(self, face_names, descriptors_dict, vid_path):
         """Play videos corresponding to recognised people."""
+        greeting = []
         for name in face_names:
-            if name not in self.recognized_people:
-                self.recognized_people.add(name)
-                p = subprocess.Popen(
-                    [
-                        "/usr/bin/ffplay",
-                        "-autoexit",
-                        "-vf",
-                        "colorkey=green:0.3:0.2,fade=in:0:15",
-                        os.path.join(vid_path, name),
-                    ]
-                )
-                p.wait()
+            if name in descriptors_dict:
+                del descriptors_dict[name]
+                greeting.append(name)
+
+        """
+            coommon works 
+        """
+        for name_greeting in greeting:
+            p = subprocess.Popen(
+                [
+                    "/usr/bin/ffplay",
+                    "-autoexit",
+                    "-vf",
+                    "colorkey=green:0.3:0.2,fade=in:0:15",
+                    os.path.join(vid_path, name_greeting + ".mp4"),
+                ]
+            )
+            p.wait()
+
+            # p = subprocess.Popen(
+            #     [
+            #         "/usr/bin/ffplay",
+            #         "-autoexit",
+            #         "-vf",
+            #         "colorkey=green:0.3:0.2,fade=in:0:15",
+            #         os.path.join(vid_path, 'Greeting.mp4'),
+            #     ]
+            # )
+            # p.wait()
+
 
     def draw_bounding_boxes(self, frame, face_names, boxes):
         for name, box in zip(face_names, boxes):
             print(box.x, box.y, box.x + box.width, box.y + box.height)
-            cv2.rectangle(frame, (int(box.x), int(box.y)), (int(box.x + box.width), int(box.y + box.height)), (0, 0, 255), 3)
+            cv2.rectangle(
+                frame,
+                (int(box.x), int(box.y)),
+                (int(box.x + box.width), int(box.y + box.height)),
+                (0, 0, 255),
+                3,
+            )
             font = cv2.FONT_HERSHEY_SIMPLEX
-            cv2.putText(frame, name, (int(box.x), int(box.y - 10)), font, 1, (25, 240, 25), 2)
+            cv2.putText(
+                frame, name, (int(box.x), int(box.y - 10)), font, 1, (25, 240, 25), 2
+            )

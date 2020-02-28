@@ -4,12 +4,14 @@ import subprocess
 from time import time
 
 import cv2
+
 # VisionLabs
 import FaceEngine as fe
 import numpy as np
-
+import copy
 from extract_descriptors import Database_creator
 from recognize import Recognizer
+import threading
 
 # PATHS
 luna_sdk_path = "/home/emin/Documents/luna-sdk_ub1804_rel_v.3.8.8"
@@ -17,15 +19,33 @@ data_path = luna_sdk_path + "/data"
 conf_path = data_path + "/faceengine.conf"
 
 # Paths to pics and videos from the dataset
-face_image_path = "../pics/Robotics_Lab/"
-video_path = "../videos/Robotics_Lab/"
+#face_image_path = "../pics/Robotics_Lab/"
+face_image_path = "../pics/Government/"
+#video_path = "../videos/Robotics_Lab/"
+video_path = "../videos/Government/"
 
-N_FRAMES = 25 # Process only every N_FRAMES frame
+N_FRAMES = 5  # Process only every N_FRAMES frame
 
 database = Database_creator()
-recognizer = Recognizer(threshold = 0.9)
+recognizer = Recognizer(threshold=0.9)
+
+time_define = True
+
+# -------------------------------------------------------
+timer_is_running = False
+
+
+def play_video(face_names, descriptors_dict_work, video_path):
+    global timer_is_running
+    recognizer.play_video(face_names, descriptors_dict_work, video_path)
+    timer_is_running = False
+# -------------------------------------------------------
+
 
 def main():
+    global timer_is_running
+    global time_define
+    timer_is_running = False
     # Get image names and sort them
     image_names = os.listdir(face_image_path)
 
@@ -38,7 +58,8 @@ def main():
     start_time = time()
     # Load dictionary with descriptors
     descriptors_dict = database.get_descriptors(image_names)
-    #print(descriptors_dict)
+    descriptors_dict_work = copy.deepcopy(descriptors_dict)
+    # print(descriptors_dict)
     print("Time for database creation: {:.4f}".format(time() - start_time))
 
     video_capture = cv2.VideoCapture(0)
@@ -56,21 +77,35 @@ def main():
             break
 
         # Recognize and find faces and locations
-        (face_names, boxes) = recognizer.recognize(
-            frame, descriptors_dict
-        )
+        (face_names, boxes) = recognizer.recognize(frame, descriptors_dict)
         # Draw boxes
         recognizer.draw_bounding_boxes(frame, face_names, boxes)
-        
+
         if len(face_names) == 0:
             continue
         else:
-        # Process every N_FRAMES frame
-            if count_frames%N_FRAMES == 0:
-                recognizer.play_video(
-                    face_names, video_path
-                )
-                count_frames = 0
+            # Process every N_FRAMES frame
+            if time_define == True:
+                print(timer_is_running)
+                if len(face_names) == 0:
+                    continue
+                else:
+                    if timer_is_running == False:
+                        timer_is_running = True
+                        t = threading.Timer(
+                            3.0,
+                            play_video,
+                            (
+                                copy.deepcopy(face_names),
+                                descriptors_dict_work,
+                                video_path,
+                            ),
+                        )
+                        t.start()
+            else:
+                if count_frames % N_FRAMES == 0:
+                    recognizer.play_video(face_names, descriptors_dict_work, video_path)
+                    count_frames = 0
 
         cv2.imshow("frame", frame)
         if cv2.waitKey(1) & 0xFF == ord("q"):

@@ -10,8 +10,7 @@ luna_sdk_path = "/home/emin/Documents/luna-sdk_ub1804_rel_v.3.8.8"
 # package_path = os.path.abspath("./")
 data_path = luna_sdk_path + "/data"
 conf_path = data_path + "/faceengine.conf"
-face_image_path = "../pics/Robotics_Lab/"
-
+face_image_path = "../pics/Government/"
 
 # The class that creates the database with descriptors from the pictures in the database
 class Database_creator:

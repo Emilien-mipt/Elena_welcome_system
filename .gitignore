@@ -9,3 +9,6 @@
 
 # PyCharm configs
 .idea/
+
+# Ignore binary files for CPython
+*.pyc

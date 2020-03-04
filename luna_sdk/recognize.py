@@ -1,9 +1,10 @@
 import os
 import subprocess
 from time import time
-
+import glob
 import numpy as np
 import cv2
+import random
 
 # VisionLabs
 import FaceEngine as fe
@@ -27,7 +28,7 @@ class Recognizer:
         self.matcher = self.faceEngine.createMatcher()
         # Create descriptor to load the descriptors from the database
         self.loaded_descriptor = self.faceEngine.createDescriptor()
-
+        self.JokeEnable = False
 
     def _detect_faces(self, _image_det):
         max_detections = 10
@@ -115,40 +116,68 @@ class Recognizer:
         print()
         return (face_names, boxes)
 
-    def play_video(self, face_names, descriptors_dict, vid_path):
-        """Play videos corresponding to recognised people."""
-        greeting = []
+    def planing(self, face_names, vid_path, joke_files, face_list):
+        max = 1
+        cname = ""
         for name in face_names:
-            if name in descriptors_dict:
-                del descriptors_dict[name]
-                greeting.append(name)
+            if name == "Efimov":
+                self.JokeEnable = False
+            elif (
+                name == "Vladimirov"
+                or name == "Gogia"
+                or name == "Sedunov"
+                or name == "Tagiev"
+            ):
+                self.JokeEnable = True
+            try:
+                ind = face_list.index(name)
+            except:
+                pass
+                ind=0
+            if ind > max:
+                max = ind
+                cname = name
+        if max > 1:
+            if self.play_video(vid_path, cname):
+                face_list[max] = ""
+        else:
+            if self.JokeEnable == True:
+                idx = random.randrange(10)
+                if idx > 5:
+                    self.play_joke(joke_files)
 
-        """
-            coommon works 
-        """
-        for name_greeting in greeting:
+    def play_joke(self, files=list):
+        idx = random.randrange(len(files))
+        file2play = files[idx]
+        if os.path.isfile(file2play):
             p = subprocess.Popen(
                 [
                     "/usr/bin/ffplay",
                     "-autoexit",
                     "-vf",
-                    "colorkey=green:0.3:0.2,fade=in:0:15",
-                    os.path.join(vid_path, name_greeting + ".mp4"),
+                    "colorkey=green:0.3:0.2",
+                    file2play,
                 ]
             )
             p.wait()
+        pass
 
-            # p = subprocess.Popen(
-            #     [
-            #         "/usr/bin/ffplay",
-            #         "-autoexit",
-            #         "-vf",
-            #         "colorkey=green:0.3:0.2,fade=in:0:15",
-            #         os.path.join(vid_path, 'Greeting.mp4'),
-            #     ]
-            # )
-            # p.wait()
-
+    def play_video(self, vid_path, file_name):
+        filename = os.path.join(vid_path, file_name + ".mp4")
+        if os.path.isfile(filename):
+            p = subprocess.Popen(
+                [
+                    "/usr/bin/ffplay",
+                    "-autoexit",
+                    "-vf",
+                    "colorkey=green:0.3:0.2",
+                    filename,
+                ]
+            )
+            p.wait()
+            return  True
+        else:
+            return False
 
     def draw_bounding_boxes(self, frame, face_names, boxes):
         for name, box in zip(face_names, boxes):

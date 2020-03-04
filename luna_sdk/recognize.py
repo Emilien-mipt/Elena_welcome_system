@@ -28,6 +28,7 @@ class Recognizer:
         self.matcher = self.faceEngine.createMatcher()
         # Create descriptor to load the descriptors from the database
         self.loaded_descriptor = self.faceEngine.createDescriptor()
+        # Bool for enabling the joke mode
         self.JokeEnable = False
 
     def _detect_faces(self, _image_det):
@@ -116,6 +117,7 @@ class Recognizer:
         print()
         return (face_names, boxes)
 
+    # Scenario for greeting and pronouncing random phrases and jokes
     def planing(self, face_names, vid_path, joke_files, face_list):
         max = 1
         cname = ""
@@ -133,7 +135,7 @@ class Recognizer:
                 ind = face_list.index(name)
             except:
                 pass
-                ind=0
+                ind = 0
             if ind > max:
                 max = ind
                 cname = name
@@ -145,7 +147,8 @@ class Recognizer:
                 idx = random.randrange(10)
                 if idx > 5:
                     self.play_joke(joke_files)
-
+    
+    # Function for playing random phrases and jokes
     def play_joke(self, files=list):
         idx = random.randrange(len(files))
         file2play = files[idx]
@@ -175,7 +178,7 @@ class Recognizer:
                 ]
             )
             p.wait()
-            return  True
+            return True
         else:
             return False
 

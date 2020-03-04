@@ -15,7 +15,7 @@ from recognize import Recognizer
 import threading
 import glob
 
-RATIO = 2.
+RATIO = 2.0
 
 # PATHS
 luna_sdk_path = "/home/emin/Documents/luna-sdk_ub1804_rel_v.3.8.8"
@@ -44,13 +44,9 @@ timer_time = 2
 timer_is_running = False
 
 
-def planing(
-    face_names, video_path, joke_files=list, face_list=list
-):
+def planing(face_names, video_path, joke_files=list, face_list=list):
     global timer_is_running
-    recognizer.planing(
-        face_names, video_path, joke_files, face_list
-    )
+    recognizer.planing(face_names, video_path, joke_files, face_list)
     timer_is_running = False
 
 
@@ -83,9 +79,12 @@ def main():
     sorted_face_list = sorted(face_list[1:])
     sorted_known_names = sorted(known_face_names)
     for entry in face_list[1:]:
-        if  not entry in known_face_names:
+        if not entry in known_face_names:
             pass
-    print("-----------------------------TEST------------------------", sorted_face_list == sorted_known_names)
+    print(
+        "-----------------------------TEST------------------------",
+        sorted_face_list == sorted_known_names,
+    )
 
     start_time = time()
     # Load dictionary with descriptors
@@ -94,7 +93,7 @@ def main():
     print("Time for database creation: {:.4f}".format(time() - start_time))
 
     video_capture = cv2.VideoCapture(0)
-    #video_capture = cv2.VideoCapture("/tmp/video1")
+    # video_capture = cv2.VideoCapture("/tmp/video1")
     process = True
     frame = np.zeros((480, 640, 3))
     count_frames = 0
@@ -111,6 +110,7 @@ def main():
 
         # Recognize and find faces and locations
         (face_names, boxes) = recognizer.recognize(frame, descriptors_dict)
+        
         # Draw boxes
         recognizer.draw_bounding_boxes(frame, face_names, boxes)
         if len(face_names) == 0:
@@ -123,24 +123,16 @@ def main():
                     t = threading.Timer(
                         timer_time,
                         planing,
-                        (
-                            copy.deepcopy(face_names),
-                            video_path,
-                            joke_files,
-                            face_list,
-                        ),
+                        (copy.deepcopy(face_names), video_path, joke_files, face_list,),
                     )
                     t.start()
             else:
                 if count_frames % N_FRAMES == 0:
                     recognizer.planing(
-                        face_names,
-                        video_path,
-                        joke_files,
-                        face_list,
+                        face_names, video_path, joke_files, face_list,
                     )
                     count_frames = 0
-        
+
         small_frame = cv2.resize(frame, (0, 0), fx=1.0 / RATIO, fy=1 / RATIO)
         cv2.imshow("frame", small_frame)
         if cv2.waitKey(1) & 0xFF == ord("q"):

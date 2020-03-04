@@ -63,7 +63,7 @@ def main():
         recognizer.draw_bounding_boxes(frame, face_names, boxes)
         
         if len(face_names) == 0:
-            continue
+            pass
         else:
         # Process every N_FRAMES frame
             if count_frames%N_FRAMES == 0:

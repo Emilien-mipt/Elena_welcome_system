@@ -2,6 +2,8 @@ import json
 import os
 import subprocess
 from time import time
+import threading
+import copy
 
 import cv2
 # VisionLabs
@@ -20,12 +22,21 @@ conf_path = data_path + "/faceengine.conf"
 face_image_path = "../pics/Robotics_Lab/"
 video_path = "../videos/Robotics_Lab/"
 
-N_FRAMES = 25 # Process only every N_FRAMES frame
+DELAY_TIME = 1.0 
 
 database = Database_creator()
 recognizer = Recognizer(threshold = 0.9)
 
+def play_video(face_names, descriptors_dict_work, video_path):
+    global timer_is_running
+    recognizer.play_video(face_names, descriptors_dict_work, video_path)
+    timer_is_running = False
+
 def main():
+    # Global variable to check whether timer is running or not
+    global timer_is_running 
+    timer_is_running = False
+
     # Get image names and sort them
     image_names = os.listdir(face_image_path)
 
@@ -39,6 +50,7 @@ def main():
     # Load dictionary with descriptors
     descriptors_dict = database.get_descriptors(image_names)
     #print(descriptors_dict)
+
     print("Time for database creation: {:.4f}".format(time() - start_time))
 
     video_capture = cv2.VideoCapture(0)
@@ -65,12 +77,18 @@ def main():
         if len(face_names) == 0:
             pass
         else:
-        # Process every N_FRAMES frame
-            if count_frames%N_FRAMES == 0:
-                recognizer.play_video(
-                    face_names, video_path
+            if timer_is_running == False:
+                timer_is_running = True
+            # Play video after some time
+                t = threading.Timer(
+                    DELAY_TIME,
+                    recognizer.play_video,
+                    (
+                        copy.deepcopy(face_names),
+                        video_path,
+                    ),
                 )
-                count_frames = 0
+                t.start()
 
         cv2.imshow("frame", frame)
         if cv2.waitKey(1) & 0xFF == ord("q"):

@@ -35,18 +35,19 @@ def main():
     # Get image names
     image_names = os.listdir(face_image_path)
 
-    print("Image names: ", image_names)
-
-    # Get video names
-    video_names = os.listdir(video_path)
+    # Get paths to images
+    paths_to_images = [os.path.join(os.path.abspath(face_image_path), name) for name in image_names]
 
     # Get names of the people from uploaded images and their face encodings
     known_face_names = database.get_known_names(image_names)
 
+    # Get video names
+    video_names = os.listdir(video_path)
+
     start_time = time()
 
     # Create the dictionary with descriptors
-    descriptors_dict = database.get_descriptors(image_names)
+    descriptors_dict = database.get_descriptors(paths_to_images)
 
     print("Time for database creation: {:.4f}".format(time() - start_time))
 

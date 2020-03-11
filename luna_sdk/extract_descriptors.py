@@ -10,8 +10,6 @@ LUNA_SDK_PATH = "/home/emin/Documents/luna-sdk_ub1804_rel_v.3.8.8"
 DATA_PATH = LUNA_SDK_PATH + "/data"
 CONF_PATH = DATA_PATH + "/faceengine.conf"
 
-face_image_path = "../pics/Robotics_Lab/"
-
 # The class that creates the database with descriptors from the pictures in the database
 class Database_creator:
     def __init__(self):
@@ -54,10 +52,9 @@ class Database_creator:
         _warp_image = warp_result[1]
         return _warp_image
 
-    def _extract_from_photo(self, image_name):
+    def _extract_from_photo(self, path_to_image):
         """Extract the descriptor from single photo."""
         # load image from file
-        path_to_image = os.path.join(face_image_path, image_name)
         img = PILImage.open(path_to_image)
         img.load()
         # convert image to numpy array
@@ -86,14 +83,14 @@ class Database_creator:
         err, desc = self.descriptor.save()
         return desc
 
-    def get_descriptors(self, image_names):
+    def get_descriptors(self, paths_to_images):
         """Create the dictionary with descriptors of people from the database."""
-        N = len(image_names)
+        N = len(paths_to_images)
         print("Extracting the descriptors from the database...")
         for i in range(N):
             self.people_descriptors[
                 self.known_face_names[i]
-            ] = self._extract_from_photo(image_names[i])
-        assert len(self.people_descriptors) == len(image_names)
+            ] = self._extract_from_photo(paths_to_images[i])
+        assert len(self.people_descriptors) == len(paths_to_images)
         print("Extracted the descriptors sucessfuly.")
         return self.people_descriptors

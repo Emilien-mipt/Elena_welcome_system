@@ -6,17 +6,16 @@ import numpy as np
 from PIL import Image as PILImage
 
 # PATHS
-luna_sdk_path = "/home/emin/Documents/luna-sdk_ub1804_rel_v.3.8.8"
-# package_path = os.path.abspath("./")
-data_path = luna_sdk_path + "/data"
-conf_path = data_path + "/faceengine.conf"
-face_image_path = "../pics/Robotics_Lab/"
+LUNA_SDK_PATH = "/home/emin/Documents/luna-sdk_ub1804_rel_v.3.8.8"
+DATA_PATH = LUNA_SDK_PATH + "/data"
+CONF_PATH = DATA_PATH + "/faceengine.conf"
 
+face_image_path = "../pics/Robotics_Lab/"
 
 # The class that creates the database with descriptors from the pictures in the database
 class Database_creator:
     def __init__(self):
-        self.faceEngine = fe.createFaceEngine(data_path, conf_path)
+        self.faceEngine = fe.createFaceEngine(DATA_PATH, CONF_PATH)
         # Create warper
         self.warper = self.faceEngine.createWarper()
         # Create extractor and descriptor

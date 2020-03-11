@@ -10,21 +10,16 @@ import numpy as np
 from extract_descriptors import Database_creator
 from recognize import Recognizer
 
-# PATHS
-luna_sdk_path = "/home/emin/Documents/luna-sdk_ub1804_rel_v.3.8.8"
-data_path = luna_sdk_path + "/data"
-conf_path = data_path + "/faceengine.conf"
-
 DELAY_TIME = 1.0
 
 database = Database_creator()
 recognizer = Recognizer(threshold=0.9)
 
 
-def play_video(face_names, descriptors_dict_work, video_path):
+def play_video(face_names, video_path):
     """Enable video playing and disable timer."""
     global timer_is_running
-    recognizer.play_video(face_names, descriptors_dict_work, video_path)
+    recognizer.play_video(face_names, video_path)
     timer_is_running = False
 
 
@@ -82,7 +77,7 @@ def main():
                 # Play video after some time
                 t = threading.Timer(
                     DELAY_TIME,
-                    recognizer.play_video,
+                    play_video,
                     (copy.deepcopy(face_names), video_path,),
                 )
                 t.start()

@@ -19,7 +19,7 @@ class Recognizer:
         """Initialize the value for threshold, objects for Face engine module and set for storing the people, who are already recognized by the system."""
         self.threshold = threshold
         # Create face engine
-        self.faceEngine = fe.createFaceEngine(data_path, conf_path)
+        self.faceEngine = fe.createFaceEngine(DATA_PATH, CONF_PATH)
         self.warper = self.faceEngine.createWarper()
         # Create extractor and descriptor for detected faces in the frame
         self.image_extractor = self.faceEngine.createExtractor()

@@ -14,13 +14,14 @@ DELAY_TIME = 1.0
 
 database = Database_creator()
 recognizer = Recognizer(threshold=0.9)
-
+lock = threading.RLock()
 
 def play_video(face_names, video_path):
     """Enable video playing and disable timer."""
     global timer_is_running
     recognizer.play_video(face_names, video_path)
-    timer_is_running = False
+    with lock:
+        timer_is_running = False
 
 
 def main():
@@ -73,15 +74,16 @@ def main():
         if len(face_names) == 0:
             pass
         else:
-            if timer_is_running is False:
-                timer_is_running = True
-                # Play video after some time
-                t = threading.Timer(
-                    DELAY_TIME,
-                    play_video,
-                    (copy.deepcopy(face_names), video_path,),
-                )
-                t.start()
+            with lock:
+                if timer_is_running is False:
+                    timer_is_running = True
+                    # Play video after some time
+                    t = threading.Timer(
+                        DELAY_TIME,
+                        play_video,
+                        (copy.deepcopy(face_names), video_path,),
+                    )
+                    t.start()
 
         cv2.imshow("frame", frame)
         if cv2.waitKey(1) & 0xFF == ord("q"):

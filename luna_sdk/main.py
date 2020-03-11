@@ -13,14 +13,12 @@ import numpy as np
 from extract_descriptors import Database_creator
 from recognize import Recognizer
 
+import argparse
+
 # PATHS
 luna_sdk_path = "/home/emin/Documents/luna-sdk_ub1804_rel_v.3.8.8"
 data_path = luna_sdk_path + "/data"
 conf_path = data_path + "/faceengine.conf"
-
-# Paths to pics and videos from the dataset
-face_image_path = "../pics/Robotics_Lab/"
-video_path = "../videos/Robotics_Lab/"
 
 DELAY_TIME = 1.0 
 
@@ -33,6 +31,10 @@ def play_video(face_names, descriptors_dict_work, video_path):
     timer_is_running = False
 
 def main():
+    # Parse paths to pics and corresponding videos with greetings to create a database
+    face_image_path = p.path_photos
+    video_path = p.path_videos
+
     # Global variable to check whether timer is running or not
     global timer_is_running 
     timer_is_running = False
@@ -47,6 +49,7 @@ def main():
     known_face_names = database.get_known_names(image_names)
 
     start_time = time()
+
     # Load dictionary with descriptors
     descriptors_dict = database.get_descriptors(image_names)
     #print(descriptors_dict)
@@ -96,4 +99,8 @@ def main():
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Process paths to photos of people and corresponding videos')
+    parser.add_argument('--photos', dest = 'path_photos', default='../pics/Robotics_Lab/', help='Path to photos for descriptor extraction and formation of the database')
+    parser.add_argument('--videos', dest = 'path_videos', default='../videos/Robotics_Lab/', help='Path to videos with greetings')
+    p=parser.parse_args()
     main()

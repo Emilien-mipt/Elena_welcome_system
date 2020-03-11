@@ -2,20 +2,21 @@ import os
 import subprocess
 from time import time
 
-import numpy as np
 import cv2
 
 # VisionLabs
 import FaceEngine as fe
+import numpy as np
 
 # PATHS
-luna_sdk_path = "/home/emin/Documents/luna-sdk_ub1804_rel_v.3.8.8"
-data_path = luna_sdk_path + "/data"
-conf_path = data_path + "/faceengine.conf"
+LUNA_SDK_PATH = "/home/emin/Documents/luna-sdk_ub1804_rel_v.3.8.8"
+DATA_PATH = LUNA_SDK_PATH + "/data"
+CONF_PATH = DATA_PATH + "/faceengine.conf"
 
 
 class Recognizer:
     def __init__(self, threshold):
+        """Initialize the value for threshold, objects for Face engine module and set for storing the people, who are already recognized by the system."""
         self.threshold = threshold
         # Create face engine
         self.faceEngine = fe.createFaceEngine(data_path, conf_path)
@@ -48,22 +49,20 @@ class Recognizer:
         _warp_image = warp_result[1]
         return _warp_image
 
-    # sorting face by square
     def _sort_by_square(self, face):
+        """Sort face by square."""
         return face.detection.rect.height * face.detection.rect.width
 
-    # identify person, get fe.image, person_id, return identification result bool
     def _compare_descriptors(self, loaded_descriptor_value):
-        # create extractor and mathcer
+        """Compare the descriptors of detected people and people from the database and return similarity in the form of the float."""
         print("Comparing descriptors...")
-        # create descriptors
         # extract descriptor from dictionary value
         self.loaded_descriptor.load(loaded_descriptor_value, 1)
         result = self.matcher.match(self.image_descriptor, self.loaded_descriptor)
         return result.value.similarity
 
-    # Recognize and return recognition result
     def recognize(self, frame, descriptor_dictionary):
+        """Recognize and return recognition result."""
         # convert frame to numpy array
         np_image = np.asarray(frame)
         # create FaceEngine img
@@ -133,8 +132,17 @@ class Recognizer:
                 p.wait()
 
     def draw_bounding_boxes(self, frame, face_names, boxes):
+        """Draw boxes around recognized people."""
         for name, box in zip(face_names, boxes):
             print(box.x, box.y, box.x + box.width, box.y + box.height)
-            cv2.rectangle(frame, (int(box.x), int(box.y)), (int(box.x + box.width), int(box.y + box.height)), (0, 0, 255), 3)
+            cv2.rectangle(
+                frame,
+                (int(box.x), int(box.y)),
+                (int(box.x + box.width), int(box.y + box.height)),
+                (0, 0, 255),
+                3,
+            )
             font = cv2.FONT_HERSHEY_SIMPLEX
-            cv2.putText(frame, name, (int(box.x), int(box.y - 10)), font, 1, (25, 240, 25), 2)
+            cv2.putText(
+                frame, name, (int(box.x), int(box.y - 10)), font, 1, (25, 240, 25), 2
+            )

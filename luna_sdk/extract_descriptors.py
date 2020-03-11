@@ -27,6 +27,7 @@ class Database_creator:
         self.people_descriptors = {}
 
     def get_known_names(self, image_names):
+        """Form the list of names of people from the dataset."""
         N = len(image_names)
         for i in range(N):
             # Get names
@@ -55,6 +56,7 @@ class Database_creator:
         return _warp_image
 
     def _extract_from_photo(self, image_name):
+        """Extract the descriptor from single photo."""
         # load image from file
         path_to_image = os.path.join(face_image_path, image_name)
         img = PILImage.open(path_to_image)
@@ -86,6 +88,7 @@ class Database_creator:
         return desc
 
     def get_descriptors(self, image_names):
+        """Create the dictionary with descriptors of people from the database."""
         N = len(image_names)
         print("Extracting the descriptors from the database...")
         for i in range(N):

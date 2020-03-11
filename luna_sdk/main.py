@@ -1,34 +1,32 @@
-import json
-import os
-import subprocess
-from time import time
-import threading
+import argparse
 import copy
+import os
+import threading
+from time import time
 
 import cv2
-# VisionLabs
-import FaceEngine as fe
 import numpy as np
 
 from extract_descriptors import Database_creator
 from recognize import Recognizer
-
-import argparse
 
 # PATHS
 luna_sdk_path = "/home/emin/Documents/luna-sdk_ub1804_rel_v.3.8.8"
 data_path = luna_sdk_path + "/data"
 conf_path = data_path + "/faceengine.conf"
 
-DELAY_TIME = 1.0 
+DELAY_TIME = 1.0
 
 database = Database_creator()
-recognizer = Recognizer(threshold = 0.9)
+recognizer = Recognizer(threshold=0.9)
+
 
 def play_video(face_names, descriptors_dict_work, video_path):
+    """Enable video playing and disable timer."""
     global timer_is_running
     recognizer.play_video(face_names, descriptors_dict_work, video_path)
     timer_is_running = False
+
 
 def main():
     # Parse paths to pics and corresponding videos with greetings to create a database
@@ -36,13 +34,15 @@ def main():
     video_path = p.path_videos
 
     # Global variable to check whether timer is running or not
-    global timer_is_running 
+    global timer_is_running
     timer_is_running = False
 
-    # Get image names and sort them
+    # Get image names
     image_names = os.listdir(face_image_path)
 
-    # Get video names and sort them
+    print("Image names: ", image_names)
+
+    # Get video names
     video_names = os.listdir(video_path)
 
     # Get names of the people from uploaded images and their face encodings
@@ -50,9 +50,8 @@ def main():
 
     start_time = time()
 
-    # Load dictionary with descriptors
+    # Create the dictionary with descriptors
     descriptors_dict = database.get_descriptors(image_names)
-    #print(descriptors_dict)
 
     print("Time for database creation: {:.4f}".format(time() - start_time))
 
@@ -71,25 +70,20 @@ def main():
             break
 
         # Recognize and find faces and locations
-        (face_names, boxes) = recognizer.recognize(
-            frame, descriptors_dict
-        )
+        (face_names, boxes) = recognizer.recognize(frame, descriptors_dict)
         # Draw boxes
         recognizer.draw_bounding_boxes(frame, face_names, boxes)
-        
+
         if len(face_names) == 0:
             pass
         else:
-            if timer_is_running == False:
+            if timer_is_running is False:
                 timer_is_running = True
-            # Play video after some time
+                # Play video after some time
                 t = threading.Timer(
                     DELAY_TIME,
                     recognizer.play_video,
-                    (
-                        copy.deepcopy(face_names),
-                        video_path,
-                    ),
+                    (copy.deepcopy(face_names), video_path,),
                 )
                 t.start()
 
@@ -99,8 +93,20 @@ def main():
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Process paths to photos of people and corresponding videos')
-    parser.add_argument('--photos', dest = 'path_photos', default='../pics/Robotics_Lab/', help='Path to photos for descriptor extraction and formation of the database')
-    parser.add_argument('--videos', dest = 'path_videos', default='../videos/Robotics_Lab/', help='Path to videos with greetings')
-    p=parser.parse_args()
+    parser = argparse.ArgumentParser(
+        description="Process paths to photos of people and corresponding videos"
+    )
+    parser.add_argument(
+        "--photos",
+        dest="path_photos",
+        default="../pics/Robotics_Lab/",
+        help="Path to photos for descriptor extraction and formation of the database",
+    )
+    parser.add_argument(
+        "--videos",
+        dest="path_videos",
+        default="../videos/Robotics_Lab/",
+        help="Path to videos with greetings",
+    )
+    p = parser.parse_args()
     main()

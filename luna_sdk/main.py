@@ -51,8 +51,10 @@ def main():
     descriptors_dict = database.get_descriptors(paths_to_images)
 
     print("Time for database creation: {:.4f}".format(time() - start_time))
-
+ 
     video_capture = cv2.VideoCapture(0)
+    #video_capture = cv2.VideoCapture('rtmp://127.0.0.1:6004/cam/stream')
+    #video_capture = cv2.VideoCapture('rtsp://admin:12345@192.168.88.101:554/trackID=1&basic_auth=YWRtaW46MTIzNDU=')
     process = True
     frame = np.zeros((480, 640, 3))
     count_frames = 0

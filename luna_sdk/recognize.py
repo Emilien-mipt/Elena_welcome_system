@@ -126,7 +126,7 @@ class Recognizer:
                         "-autoexit",
                         "-vf",
                         "colorkey=green:0.3:0.2,fade=in:0:15",
-                        os.path.join(vid_path, name),
+                        os.path.join(vid_path, name + '.mp4'),
                     ]
                 )
                 p.wait()
